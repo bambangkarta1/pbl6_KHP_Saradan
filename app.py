@@ -176,10 +176,9 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # ============================================
-# 6. FUNGSI KONTROL GRAFIK (FULLY FIXED)
+# 6. FUNGSI KONTROL GRAFIK
 # ============================================
 
-# Daftar tema warna yang tersedia
 COLOR_THEMES = {
     "Greens": px.colors.sequential.Greens_r,
     "Blues": px.colors.sequential.Blues_r,
@@ -196,7 +195,6 @@ COLOR_THEMES = {
 }
 
 def create_chart_controls(chart_type_default="Bar"):
-    """Membuat kontrol untuk grafik"""
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -220,13 +218,11 @@ def create_chart_controls(chart_type_default="Bar"):
     return chart_type, color_theme, show_labels, show_grid
 
 def get_color_theme(theme_name):
-    """Mendapatkan color sequence dari nama tema"""
     if theme_name in COLOR_THEMES:
         return COLOR_THEMES[theme_name]
     return px.colors.sequential.Greens_r
 
 def apply_chart_settings(fig, show_grid=True, height=400):
-    """Mengaplikasikan pengaturan ke grafik"""
     fig.update_layout(
         height=height,
         hovermode='x unified',
@@ -252,23 +248,16 @@ def apply_chart_settings(fig, show_grid=True, height=400):
     
     return fig
 
-# ============================================
-# FUNGSI create_flexible_chart - FULLY FIXED
-# ============================================
-def create_flexible_chart(data, x_col, y_col, chart_type, color_theme, 
-                          show_labels=True, title="", color_col=None, 
+def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
+                          show_labels=True, title="", color_col=None,
                           text_col=None, group_col=None, barmode='group'):
-    """
-    Membuat grafik fleksibel dengan berbagai tipe - FULLY FIXED
-    """
     colors = get_color_theme(color_theme)
-    
-    # Jika data kosong
+
     if data.empty:
         fig = go.Figure()
         fig.add_annotation(text="Data tidak tersedia", showarrow=False)
         return fig
-    
+
     if chart_type == "Pie":
         fig = px.pie(
             data,
@@ -279,9 +268,8 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
             hole=0.3
         )
         fig.update_traces(textinfo='percent+label')
-        
+
     elif chart_type == "Bar":
-        # ✅ BAR CHART DENGAN LEBAR YANG BESAR
         if color_col and color_col in data.columns:
             fig = px.bar(
                 data,
@@ -302,130 +290,182 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                 color_discrete_sequence=colors,
                 text=text_col if show_labels and text_col else None
             )
-        
-        # ✅ Perbaiki lebar bar menjadi lebih besar
+
         fig.update_traces(
-            width=0.7,  # Lebar bar 70% dari ruang yang tersedia
+            width=0.7,
             marker=dict(line=dict(width=1, color='white'))
         )
-        
+
         if show_labels and text_col:
             fig.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
-        
-        # ✅ Atur ukuran grafik
+
         fig.update_layout(
             bargap=0.15,
             bargroupgap=0.1
         )
-        
+
     elif chart_type == "Line":
-        # ✅ LINE CHART DENGAN GARIS TEBAL
+        # ===== PERBAIKAN: selalu plot sebagai 1 trace agar garis muncul =====
+        # color_col diabaikan untuk Line chart karena tiap group hanya 1 titik
         fig = go.Figure()
-        
-        if color_col and color_col in data.columns:
-            for i, group in enumerate(data[color_col].unique()):
-                group_data = data[data[color_col] == group]
+
+        # Cek apakah ada kolom group yang punya >1 baris per group (misal tahun)
+        if color_col and color_col in data.columns and x_col != color_col:
+            # Kasus data multi-series (misal produksi: group=jenis_kayu, x=tahun)
+            unique_groups = data[color_col].unique()
+            x_labels = sorted(data[x_col].unique().tolist())
+
+            for i, group in enumerate(unique_groups):
+                group_data = data[data[color_col] == group].copy()
+                if len(group_data) < 2:
+                    continue  # skip group dengan 1 titik saja
                 color_idx = i % len(colors)
-                
+                x_numeric = list(range(len(group_data)))
+                y_values = group_data[y_col].tolist()
+                x_labels_group = group_data[x_col].tolist()
+
                 fig.add_trace(go.Scatter(
-                    x=group_data[x_col],
-                    y=group_data[y_col],
-                    mode='lines+markers',
+                    x=x_numeric,
+                    y=y_values,
+                    mode='lines+markers+text' if show_labels else 'lines+markers',
                     name=str(group),
                     line=dict(width=4, color=colors[color_idx]),
-                    marker=dict(size=12, color=colors[color_idx], symbol='circle'),
-                    text=group_data[text_col] if text_col and show_labels else None,
-                    textposition='top center' if show_labels else 'none'
+                    marker=dict(size=12, color=colors[color_idx], symbol='circle',
+                               line=dict(width=2, color='white')),
+                    text=[f'{v:,.0f}' for v in y_values] if show_labels else None,
+                    textposition='top center',
                 ))
+
+                fig.update_layout(
+                    xaxis=dict(
+                        tickmode='array',
+                        tickvals=list(range(len(x_labels_group))),
+                        ticktext=x_labels_group
+                    )
+                )
         else:
+            # Kasus 1 series — plot semua baris sebagai 1 garis
+            x_numeric = list(range(len(data)))
+            x_labels = data[x_col].tolist()
+            y_values = data[y_col].tolist()
+
             fig.add_trace(go.Scatter(
-                x=data[x_col],
-                y=data[y_col],
-                mode='lines+markers',
+                x=x_numeric,
+                y=y_values,
+                mode='lines+markers+text' if show_labels else 'lines+markers',
                 name=title if title else 'Data',
-                line=dict(width=4, color='#2e7d32'),
-                marker=dict(size=12, color='#2e7d32', symbol='circle'),
-                text=data[text_col] if text_col and show_labels else None,
-                textposition='top center' if show_labels else 'none'
+                line=dict(width=4, color=colors[0]),
+                marker=dict(size=12, color=colors[0], symbol='circle',
+                           line=dict(width=2, color='white')),
+                text=[f'{v:,.0f}' for v in y_values] if show_labels else None,
+                textposition='top center',
             ))
-        
+
+            fig.update_layout(
+                xaxis=dict(
+                    tickmode='array',
+                    tickvals=x_numeric,
+                    ticktext=x_labels
+                )
+            )
+
         fig.update_layout(
             title=title,
             xaxis_title=x_col,
             yaxis_title=y_col,
             showlegend=True
         )
-        
+
     elif chart_type == "Scatter":
-        # ✅ SCATTER DENGAN TITIK BESAR + GARIS PENGHUBUNG
+        # ===== PERBAIKAN: selalu plot sebagai 1 trace agar garis penghubung muncul =====
         fig = go.Figure()
-        
-        if color_col and color_col in data.columns:
-            for i, group in enumerate(data[color_col].unique()):
-                group_data = data[data[color_col] == group]
+
+        if color_col and color_col in data.columns and x_col != color_col:
+            # Kasus multi-series (tiap group punya >1 titik)
+            unique_groups = data[color_col].unique()
+
+            for i, group in enumerate(unique_groups):
+                group_data = data[data[color_col] == group].copy()
+                if len(group_data) < 2:
+                    continue
                 color_idx = i % len(colors)
-                
+                x_numeric = list(range(len(group_data)))
+                y_values = group_data[y_col].tolist()
+                x_labels_group = group_data[x_col].tolist()
+
                 # Garis penghubung
                 fig.add_trace(go.Scatter(
-                    x=group_data[x_col],
-                    y=group_data[y_col],
+                    x=x_numeric,
+                    y=y_values,
                     mode='lines',
-                    name=f"Line - {group}",
-                    line=dict(width=2, color=colors[color_idx], dash='solid'),
+                    name=f"Tren {group}",
+                    line=dict(width=3, color=colors[color_idx], dash='solid'),
                     showlegend=False
                 ))
-                
+
                 # Titik
                 fig.add_trace(go.Scatter(
-                    x=group_data[x_col],
-                    y=group_data[y_col],
-                    mode='markers',
+                    x=x_numeric,
+                    y=y_values,
+                    mode='markers+text' if show_labels else 'markers',
                     name=str(group),
-                    marker=dict(
-                        size=15,
-                        color=colors[color_idx],
-                        symbol='circle',
-                        line=dict(width=2, color='white')
-                    ),
-                    text=group_data[text_col] if text_col and show_labels else None,
-                    textposition='top center' if show_labels else 'none'
+                    marker=dict(size=18, color=colors[color_idx], symbol='circle',
+                               line=dict(width=3, color='white')),
+                    text=[f'{v:,.0f}' for v in y_values] if show_labels else None,
+                    textposition='top center',
                 ))
+
+                fig.update_layout(
+                    xaxis=dict(
+                        tickmode='array',
+                        tickvals=list(range(len(x_labels_group))),
+                        ticktext=x_labels_group
+                    )
+                )
         else:
-            # Garis
+            # Kasus 1 series — semua baris jadi 1 garis
+            x_numeric = list(range(len(data)))
+            x_labels = data[x_col].tolist()
+            y_values = data[y_col].tolist()
+
+            # Garis penghubung
             fig.add_trace(go.Scatter(
-                x=data[x_col],
-                y=data[y_col],
+                x=x_numeric,
+                y=y_values,
                 mode='lines',
                 name='Tren',
-                line=dict(width=2, color='#2e7d32', dash='solid'),
+                line=dict(width=3, color=colors[0], dash='solid'),
                 showlegend=False
             ))
-            
+
             # Titik
             fig.add_trace(go.Scatter(
-                x=data[x_col],
-                y=data[y_col],
-                mode='markers',
+                x=x_numeric,
+                y=y_values,
+                mode='markers+text' if show_labels else 'markers',
                 name='Data',
-                marker=dict(
-                    size=15,
-                    color='#2e7d32',
-                    symbol='circle',
-                    line=dict(width=2, color='white')
-                ),
-                text=data[text_col] if text_col and show_labels else None,
-                textposition='top center' if show_labels else 'none'
+                marker=dict(size=18, color=colors[0], symbol='circle',
+                           line=dict(width=3, color='white')),
+                text=[f'{v:,.0f}' for v in y_values] if show_labels else None,
+                textposition='top center',
             ))
-        
+
+            fig.update_layout(
+                xaxis=dict(
+                    tickmode='array',
+                    tickvals=x_numeric,
+                    ticktext=x_labels
+                )
+            )
+
         fig.update_layout(
             title=title,
             xaxis_title=x_col,
             yaxis_title=y_col,
             showlegend=True
         )
-        
+
     elif chart_type == "Area":
-        # ✅ AREA CHART
         if color_col and color_col in data.columns:
             fig = px.area(
                 data,
@@ -445,15 +485,14 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                 color_discrete_sequence=colors,
                 line_shape='linear'
             )
-        
+
         fig.update_traces(
             line=dict(width=3),
             opacity=0.7,
             marker=dict(size=8)
         )
-        
+
     else:
-        # Default ke Bar
         fig = px.bar(
             data,
             x=x_col,
@@ -461,7 +500,7 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
             title=title,
             color_discrete_sequence=colors
         )
-    
+
     return fig
 
 # ============================================
@@ -503,7 +542,7 @@ if menu == "🏠 Beranda":
             color_theme=color_theme,
             show_labels=show_labels,
             title='Distribusi Luas (Preview)',
-            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            color_col='kelas_umur' if chart_type in ['Bar', 'Pie'] else None,
             text_col='luas_ha'
         )
         
@@ -587,7 +626,7 @@ elif menu == "🌳 Profil Hutan":
             color_theme=color_theme,
             show_labels=show_labels,
             title='Luas per Kelas Umur',
-            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            color_col='kelas_umur' if chart_type in ['Bar', 'Pie'] else None,
             text_col='luas_ha'
         )
         fig = apply_chart_settings(fig, show_grid)
@@ -602,7 +641,7 @@ elif menu == "🌳 Profil Hutan":
             color_theme=color_theme,
             show_labels=show_labels,
             title='Persentase per Kelas Umur',
-            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            color_col='kelas_umur' if chart_type in ['Bar', 'Pie'] else None,
             text_col='persentase'
         )
         fig2 = apply_chart_settings(fig2, show_grid)
@@ -705,25 +744,145 @@ elif menu == "🪵 Produksi Kayu":
         st.plotly_chart(fig, use_container_width=True, key="produksi_chart1")
     
     with col2:
-        prod_melted_line = filtered_prod.melt(
-            id_vars=['jenis_kayu'],
-            value_vars=tahun_filter,
-            var_name='tahun',
-            value_name='volume'
-        )
-        prod_melted_line['tahun'] = prod_melted_line['tahun'].str.replace('volume_', '')
+        if chart_type == "Line":
+            # ===== PERBAIKAN LINE CHART PRODUKSI =====
+            fig2 = go.Figure()
+
+            for kayu in filtered_prod['jenis_kayu'].unique():
+                kayu_data = filtered_prod[filtered_prod['jenis_kayu'] == kayu]
+
+                years_label = []
+                volumes = []
+                for tahun in tahun_filter:
+                    years_label.append(tahun.replace('volume_', ''))
+                    volumes.append(float(kayu_data[tahun].values[0]))
+
+                x_numeric = list(range(len(years_label)))
+                warna = '#2e7d32' if kayu == 'Jati' else '#66bb6a'
+
+                fig2.add_trace(go.Scatter(
+                    x=x_numeric,
+                    y=volumes,
+                    mode='lines+markers+text' if show_labels else 'lines+markers',
+                    name=kayu,
+                    line=dict(width=4, color=warna),
+                    marker=dict(size=14, color=warna, symbol='circle',
+                               line=dict(width=2, color='white')),
+                    text=[f'{v:,.0f} m³' for v in volumes] if show_labels else None,
+                    textposition='top center',
+                ))
+
+            fig2.update_layout(
+                title='Tren Produksi (Line)',
+                xaxis=dict(
+                    title='Tahun',
+                    tickmode='array',
+                    tickvals=list(range(len(tahun_filter))),
+                    ticktext=[t.replace('volume_', '') for t in tahun_filter]
+                ),
+                yaxis_title='Volume (m³)',
+                showlegend=True,
+                height=400,
+                hovermode='x unified'
+            )
+
+        elif chart_type == "Scatter":
+            # ===== PERBAIKAN SCATTER CHART PRODUKSI =====
+            fig2 = go.Figure()
+
+            for kayu in filtered_prod['jenis_kayu'].unique():
+                kayu_data = filtered_prod[filtered_prod['jenis_kayu'] == kayu]
+
+                years_label = []
+                volumes = []
+                for tahun in tahun_filter:
+                    years_label.append(tahun.replace('volume_', ''))
+                    volumes.append(float(kayu_data[tahun].values[0]))
+
+                x_numeric = list(range(len(years_label)))
+                warna = '#2e7d32' if kayu == 'Jati' else '#66bb6a'
+
+                # GARIS penghubung
+                fig2.add_trace(go.Scatter(
+                    x=x_numeric,
+                    y=volumes,
+                    mode='lines',
+                    name=f"Tren {kayu}",
+                    line=dict(width=3, color=warna, dash='solid'),
+                    showlegend=False
+                ))
+
+                # TITIK
+                fig2.add_trace(go.Scatter(
+                    x=x_numeric,
+                    y=volumes,
+                    mode='markers+text' if show_labels else 'markers',
+                    name=kayu,
+                    marker=dict(
+                        size=20,
+                        color=warna,
+                        symbol='circle',
+                        line=dict(width=3, color='white')
+                    ),
+                    text=[f'{v:,.0f} m³' for v in volumes] if show_labels else None,
+                    textposition='top center',
+                ))
+
+            fig2.update_layout(
+                title='Perbandingan Produksi (Scatter)',
+                xaxis=dict(
+                    title='Tahun',
+                    tickmode='array',
+                    tickvals=list(range(len(tahun_filter))),
+                    ticktext=[t.replace('volume_', '') for t in tahun_filter]
+                ),
+                yaxis_title='Volume (m³)',
+                showlegend=True,
+                height=400,
+                hovermode='x unified'
+            )
+
+        elif chart_type == "Area":
+            prod_melted_line = filtered_prod.melt(
+                id_vars=['jenis_kayu'],
+                value_vars=tahun_filter,
+                var_name='tahun',
+                value_name='volume'
+            )
+            prod_melted_line['tahun'] = prod_melted_line['tahun'].str.replace('volume_', '')
+            
+            fig2 = px.area(
+                prod_melted_line,
+                x='tahun',
+                y='volume',
+                color='jenis_kayu',
+                title='Tren Produksi (Area)',
+                color_discrete_map={'Jati': '#2e7d32', 'Rimba': '#66bb6a'},
+                line_shape='linear'
+            )
+            fig2.update_traces(line=dict(width=3), opacity=0.7, marker=dict(size=8))
+
+        else:
+            prod_melted_line = filtered_prod.melt(
+                id_vars=['jenis_kayu'],
+                value_vars=tahun_filter,
+                var_name='tahun',
+                value_name='volume'
+            )
+            prod_melted_line['tahun'] = prod_melted_line['tahun'].str.replace('volume_', '')
+            
+            fig2 = create_flexible_chart(
+                prod_melted_line,
+                x_col='tahun',
+                y_col='volume',
+                chart_type=chart_type,
+                color_theme=color_theme,
+                show_labels=show_labels,
+                title='Tren Produksi',
+                color_col='jenis_kayu' if chart_type != 'Pie' else None,
+                text_col='volume'
+            )
         
-        fig2 = create_flexible_chart(
-            prod_melted_line,
-            x_col='tahun',
-            y_col='volume',
-            chart_type="Line",
-            color_theme=color_theme,
-            show_labels=show_labels,
-            title='Tren Produksi',
-            color_col='jenis_kayu',
-            text_col='volume'
-        )
         fig2 = apply_chart_settings(fig2, show_grid)
         st.plotly_chart(fig2, use_container_width=True, key="produksi_chart2")
     
@@ -864,7 +1023,7 @@ elif menu == "⚙️ Parameter Simulasi":
     with col3:
         st.metric("NPV (Tanpa Karbon)", f"Rp {npv/1e6:,.0f} Juta")
     with col4:
-        st.metric("NPV (Dengan Karbon)", f"Rp {npv_b/1e6:,.0f} Juta", 
+        st.metric("NPV (Dengan Karbon)", f"Rp {npv_b/1e6:,.0f} Juta",
                   delta=f"+Rp {(npv_b-npv)/1e6:,.0f} Juta")
     
     st.markdown("---")
@@ -933,7 +1092,7 @@ elif menu == "📈 Dashboard Summary":
             color_theme=color_theme,
             show_labels=show_labels,
             title='Distribusi Luas per Kelas Umur',
-            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            color_col='kelas_umur' if chart_type in ['Bar', 'Pie'] else None,
             text_col='luas_ha'
         )
         fig = apply_chart_settings(fig, show_grid, height=350)
