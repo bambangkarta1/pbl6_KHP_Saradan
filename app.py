@@ -7,34 +7,57 @@ from PIL import Image
 import os
 
 # ============================================
-# 1. KONFIGURASI HALAMAN (PAGE TITLE)
+# 1. KONFIGURASI HALAMAN
 # ============================================
 st.set_page_config(
-    page_title="ECO-FOREST VALUATION - KPH Saradan",  # ← Ini judul tab browser
+    page_title="ECO-FOREST VALUATION - KPH Saradan",
     page_icon="🌳",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ============================================
-# HEADER ECO-FOREST VALUATION (VERSION 2)
+# 2. DATA
 # ============================================
+forest_data = pd.DataFrame({
+    'kelas_umur': ['KU I', 'KU II', 'KU III', 'KU IV', 'KU V', 'KU VI', 'KU VII', 'KU VIII'],
+    'kisaran_umur': ['1-10 Tahun', '11-20 Tahun', '21-30 Tahun', '31-40 Tahun', 
+                     '41-50 Tahun', '51-60 Tahun', '61-70 Tahun', '71-80 Tahun'],
+    'luas_ha': [2875.20, 3157.05, 5897.50, 4226.15, 2035.30, 1210.80, 1048.10, 801.05],
+    'persentase': [13.50, 14.83, 27.69, 19.85, 9.56, 5.69, 4.92, 3.76]
+})
 
-# CSS untuk header - warna lebih elegan
+production_data = pd.DataFrame({
+    'jenis_kayu': ['Jati', 'Rimba'],
+    'volume_2016': [7303.89, 2407.34],
+    'volume_2017': [6101.41, 2313.40],
+    'perubahan_persen': [-16.46, -3.90]
+})
+
+financial_data = pd.DataFrame({
+    'indikator': ['NPV (Rp Juta)', 'IRR (%)', 'BCR'],
+    'skenario_a': [4078, 18.00, 1.45],
+    'skenario_b': [7058, 20.00, 1.82],
+    'selisih': [2980, 2.00, 0.37]
+})
+
+# ============================================
+# 3. CSS
+# ============================================
 st.markdown("""
 <style>
     .eco-header {
         background: linear-gradient(145deg, #0d2b1e 0%, #1a5e3a 50%, #0d2b1e 100%);
-        padding: 1.8rem 2rem;
+        padding: 1.5rem 2rem;
         border-radius: 12px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         text-align: center;
         box-shadow: 0 4px 20px rgba(26, 94, 58, 0.4);
         border: 1px solid rgba(165, 214, 167, 0.15);
     }
     .eco-header h1 {
         color: #ffffff !important;
-        font-size: 2.6rem !important;
+        font-size: 2.4rem !important;
         font-weight: 700 !important;
         margin: 0 !important;
         letter-spacing: 3px;
@@ -46,122 +69,17 @@ st.markdown("""
     }
     .eco-header .sub {
         color: #a5d6a7;
-        font-size: 1.05rem;
-        margin: 0.4rem 0 0 0;
+        font-size: 1rem;
+        margin: 0.3rem 0 0 0;
         letter-spacing: 2px;
         font-weight: 300;
     }
     .eco-header .location {
         color: #66bb6a;
-        font-size: 0.9rem;
-        margin: 0.3rem 0 0 0;
-        opacity: 0.9;
-        letter-spacing: 1px;
-    }
-    .eco-header .location span {
-        color: #c8e6c9;
-    }
-    .eco-divider {
-        border: none;
-        border-top: 2px solid #2e7d32;
-        margin: 0.3rem 0 1.5rem 0;
-        opacity: 0.2;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Header ECO-FOREST VALUATION (tanpa kata "Berkelanjutan")
-st.markdown("""
-<div class="eco-header">
-    <h1>🌳 ECO-FOREST <span class="highlight">VALUATION</span></h1>
-    <p class="sub">Sistem Valuasi Ekonomi Hutan</p>
-    <p class="location">📍 KPH Saradan <span>·</span> Jawa Timur</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown('<hr class="eco-divider">', unsafe_allow_html=True)
-# ============================================
-# 3. DATA (LANGSUNG DI SINI)
-# ============================================
-
-# Data Kelas Umur
-forest_data_base = pd.DataFrame({
-    'kelas_umur': ['KU I', 'KU II', 'KU III', 'KU IV', 'KU V', 'KU VI', 'KU VII', 'KU VIII'],
-    'kisaran_umur': ['1-10 Tahun', '11-20 Tahun', '21-30 Tahun', '31-40 Tahun', 
-                     '41-50 Tahun', '51-60 Tahun', '61-70 Tahun', '71-80 Tahun'],
-    'luas_ha': [2875.20, 3157.05, 5897.50, 4226.15, 2035.30, 1210.80, 1048.10, 801.05],
-    'persentase': [13.50, 14.83, 27.69, 19.85, 9.56, 5.69, 4.92, 3.76]
-})
-
-# Data Produksi Kayu
-production_data = pd.DataFrame({
-    'jenis_kayu': ['Jati', 'Rimba'],
-    'volume_2016': [7303.89, 2407.34],
-    'volume_2017': [6101.41, 2313.40],
-    'perubahan_persen': [-16.46, -3.90]
-})
-
-st.markdown("""
-<style>
-    /* ==========================================
-       CLASS YANG DIPERTAHANKAN (DARI CSS LAMA)
-       ========================================== */
-    
-    /* Header utama dashboard */
-    .main-header {
-        font-size: 2.5rem;
-        color: #1a5e3a;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-    
-    /* Card untuk metrik */
-    .metric-card {
-        background-color: #f0f7f0;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #2e7d32;
-        margin: 0.5rem 0;
-    }
-    
-    /* Background aplikasi */
-    .stApp {
-        background-color: #f8faf8;
-    }
-    
-    /* Logo di sidebar */
-    .sidebar-logo {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 1rem;
-    }
-    
-    /* ==========================================
-       CLASS YANG DIHAPUS (TIDAK DIPAKAI LAGI)
-       ========================================== */
-    /*
-    .sidebar-title {
-        text-align: center;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1a5e3a;
-        margin-top: 0.5rem;
-        margin-bottom: 0.2rem;
-    }
-    .sidebar-subtitle {
-        text-align: center;
         font-size: 0.85rem;
-        color: #555;
-        margin-bottom: 0.5rem;
+        margin: 0.2rem 0 0 0;
+        opacity: 0.9;
     }
-    */
-    
-    /* ==========================================
-       CLASS YANG DIPERTAHANKAN (DARI CSS LAMA)
-       ========================================== */
-    
-    /* Anggota kelompok di sidebar */
     .group-member {
         font-size: 0.9rem;
         padding: 0.3rem 0;
@@ -170,8 +88,6 @@ st.markdown("""
     .group-member:last-child {
         border-bottom: none;
     }
-    
-    /* Info kuliah di sidebar */
     .course-info {
         background-color: #e8f5e9;
         padding: 0.8rem;
@@ -180,55 +96,66 @@ st.markdown("""
         font-size: 0.85rem;
         line-height: 1.6;
     }
-    
-    /* Garis pemisah di sidebar */
     .divider-custom {
         border: none;
         border-top: 2px solid #c8e6c9;
         margin: 0.8rem 0;
     }
-    
-    /* ==========================================
-       TAMBAHAN BARU (HILANGKAN JUDUL DEFAULT)
-       ========================================== */
-    
-    /* Hilangkan judul default Streamlit di sidebar */
     .css-1d391kg {
         display: none !important;
     }
+    .chart-control {
+        background-color: #f5faf5;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e0ece0;
+        margin-bottom: 1rem;
+    }
 </style>
 """, unsafe_allow_html=True)
+
 # ============================================
-# SIDEBAR (TANPA "KPH Saradan Dashboard Kehutanan")
+# 4. HEADER
+# ============================================
+st.markdown("""
+<div class="eco-header">
+    <h1>🌳 ECO-FOREST <span class="highlight">VALUATION</span></h1>
+    <p class="sub">Sistem Valuasi Ekonomi Hutan</p>
+    <p class="location">📍 KPH Saradan · Jawa Timur</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# 5. SIDEBAR
 # ============================================
 with st.sidebar:
-    # --- LOGO UNISBA ---
     try:
         logo_path = "logo-unisba.png"
         if os.path.exists(logo_path):
             logo = Image.open(logo_path)
             st.image(logo, use_container_width=True)
-        else:
-            st.markdown("""
-            <div style="text-align: center; padding: 1rem; background-color: #1a5e3a; color: white; border-radius: 0.5rem;">
-                <h3 style="color: white; margin: 0;">UNISBA</h3>
-                <p style="color: #a5d6a7; margin: 0;">Universitas Islam Bandung</p>
-            </div>
-            """, unsafe_allow_html=True)
-    except Exception:
-        st.markdown("""
-        <div style="text-align: center; padding: 1rem; background-color: #1a5e3a; color: white; border-radius: 0.5rem;">
-            <h3 style="color: white; margin: 0;">UNISBA</h3>
-            <p style="color: #a5d6a7; margin: 0;">Universitas Islam Bandung</p>
-        </div>
-        """, unsafe_allow_html=True)
+    except:
+        pass
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
     
-    # --- HILANGKAN "KPH Saradan Dashboard Kehutanan" ---
-    # LANGSUNG KE IDENTITAS KELOMPOK
+    st.markdown("### 📋 Navigasi")
+    menu = st.radio(
+        "Pilih Halaman:",
+        options=[
+            "🏠 Beranda",
+            "🌳 Profil Hutan",
+            "🪵 Produksi Kayu",
+            "📋 Master Data",
+            "⚙️ Parameter Simulasi",
+            "📈 Dashboard Summary"
+        ],
+        index=0,
+        label_visibility="collapsed"
+    )
     
-    # --- IDENTITAS KELOMPOK ---
+    st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
+    
     st.markdown("### 👥 Kelompok")
     st.markdown("""
     <div class="group-member">👤 Arif Hamdani (10090224008)</div>
@@ -238,7 +165,6 @@ with st.sidebar:
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
     
-    # --- MATA KULIAH & DOSEN ---
     st.markdown("""
     <div class="course-info">
         <strong>📚 Mata Kuliah</strong><br>
@@ -248,191 +174,444 @@ with st.sidebar:
         Yuhka Sundaya, S.E., M.Si.
     </div>
     """, unsafe_allow_html=True)
-    
-    st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
-    
-    # --- PARAMETER KONTROL ---
-    st.markdown("### ⚙️ Parameter Kontrol")
-    
-    luas_area = st.slider(
-        "Luas Kawasan Simulasi (Ha)",
-        min_value=1000.0,
-        max_value=50000.0,
-        value=float(forest_data_base['luas_ha'].sum()),
-        step=100.0
-    )
-    
-    daur_tebang = st.slider(
-        "Daur Tebang Jati (Tahun)",
-        min_value=40,
-        max_value=80,
-        value=60,
-        step=5
-    )
-    
-    discount_rate = st.slider(
-        "Suku Bunga/Discount Rate (%)",
-        min_value=5.0,
-        max_value=25.0,
-        value=15.0,
-        step=0.5
-    )
-    
-    harga_kayu = st.number_input(
-        "Harga Kayu (Rp/m³)",
-        min_value=1000000,
-        max_value=10000000,
-        value=3500000,
-        step=100000,
-        format="%d"
-    )
-    
-    st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
-    st.caption("📊 Data KPH Saradan 2026")
-    
-    # --- TAMPILKAN NILAI PARAMETER ---
-    with st.expander("📋 Nilai Parameter Aktif"):
-        st.markdown(f"""
-        - **Luas Kawasan**: {luas_area:,.0f} Ha
-        - **Daur Tebang**: {daur_tebang} Tahun
-        - **Discount Rate**: {discount_rate:.1f}%
-        - **Harga Kayu**: Rp {harga_kayu:,.0f}/m³
-        """)
 
 # ============================================
-# 5. DATA YANG BERUBAH SESUAI PARAMETER
+# 6. FUNGSI KONTROL GRAFIK (FULLY FIXED)
 # ============================================
 
-# --- DATA LUAS YANG DISESUAIKAN ---
-# Skala proporsi berdasarkan luas_area
-skala_luas = luas_area / forest_data_base['luas_ha'].sum()
-forest_data = forest_data_base.copy()
-forest_data['luas_ha'] = forest_data_base['luas_ha'] * skala_luas
-forest_data['persentase'] = (forest_data['luas_ha'] / forest_data['luas_ha'].sum()) * 100
+# Daftar tema warna yang tersedia
+COLOR_THEMES = {
+    "Greens": px.colors.sequential.Greens_r,
+    "Blues": px.colors.sequential.Blues_r,
+    "Reds": px.colors.sequential.Reds_r,
+    "Viridis": px.colors.sequential.Viridis,
+    "Plasma": px.colors.sequential.Plasma,
+    "Cividis": px.colors.sequential.Cividis,
+    "Turbo": px.colors.sequential.Turbo,
+    "Sunset": px.colors.sequential.Sunset,
+    "Magenta": px.colors.sequential.Magenta_r,
+    "Teal": px.colors.sequential.Teal_r,
+    "Oranges": px.colors.sequential.Oranges_r,
+    "Purples": px.colors.sequential.Purples_r,
+}
 
-# --- DATA PRODUKSI YANG DISESUAIKAN ---
-# Produksi dipengaruhi oleh daur_tebang (semakin panjang daur, volume per Ha semakin besar)
-faktor_daur = 1 + (daur_tebang - 60) / 200  # 60 tahun = baseline
-production_data_adj = production_data.copy()
-production_data_adj['volume_2017'] = production_data['volume_2017'] * faktor_daur
-production_data_adj['volume_2016'] = production_data['volume_2016'] * faktor_daur
+def create_chart_controls(chart_type_default="Bar"):
+    """Membuat kontrol untuk grafik"""
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        chart_type = st.selectbox(
+            "📊 Tipe Grafik",
+            options=["Bar", "Pie", "Line", "Scatter", "Area"],
+            index=["Bar", "Pie", "Line", "Scatter", "Area"].index(chart_type_default)
+        )
+    
+    with col2:
+        color_theme = st.selectbox(
+            "🎨 Tema Warna",
+            options=list(COLOR_THEMES.keys()),
+            index=0
+        )
+    
+    with col3:
+        show_labels = st.checkbox("🏷️ Tampilkan Label", value=True)
+        show_grid = st.checkbox("📏 Tampilkan Grid", value=True)
+    
+    return chart_type, color_theme, show_labels, show_grid
 
-# --- DATA FINANSIAL YANG DISESUAIKAN ---
-# NPV dipengaruhi oleh discount_rate dan harga_kayu
-total_luas = forest_data['luas_ha'].sum()
-volume_per_ha = 120 * faktor_daur  # volume per Ha dipengaruhi daur
-total_volume = total_luas * volume_per_ha
-total_pendapatan = total_volume * harga_kayu
-total_biaya = total_volume * 1500000  # biaya produksi tetap Rp 1.5 Juta/m³
-laba_kotor = total_pendapatan - total_biaya
+def get_color_theme(theme_name):
+    """Mendapatkan color sequence dari nama tema"""
+    if theme_name in COLOR_THEMES:
+        return COLOR_THEMES[theme_name]
+    return px.colors.sequential.Greens_r
 
-# Skenario A (tradisional)
-npv_a = laba_kotor / (1 + discount_rate/100)
-
-# Skenario B (dengan karbon)
-serapan_karbon = total_luas * 18.5
-nilai_karbon = serapan_karbon * 150000
-total_pendapatan_b = total_pendapatan + nilai_karbon
-laba_kotor_b = total_pendapatan_b - total_biaya
-npv_b = laba_kotor_b / (1 + discount_rate/100)
-
-# IRR dan BCR (perkiraan)
-irr_a = 18.0 + (discount_rate - 15) * 0.2  # berubah seiring discount rate
-irr_b = 20.0 + (discount_rate - 15) * 0.2
-bcr_a = total_pendapatan / total_biaya if total_biaya > 0 else 0
-bcr_b = total_pendapatan_b / total_biaya if total_biaya > 0 else 0
-
-financial_data = pd.DataFrame({
-    'indikator': ['NPV (Rp Juta)', 'IRR (%)', 'BCR'],
-    'skenario_a': [npv_a / 1e6, irr_a, bcr_a],
-    'skenario_b': [npv_b / 1e6, irr_b, bcr_b],
-    'selisih': [(npv_b - npv_a) / 1e6, irr_b - irr_a, bcr_b - bcr_a]
-})
-
-# ============================================
-# 6. HEADER UTAMA
-# ============================================
-st.markdown('<h1 class="main-header">🌳 Dashboard KPH Saradan</h1>', unsafe_allow_html=True)
-st.markdown(f"*Kesatuan Pemangkuan Hutan Saradan - Wilayah Kerja: Madiun, Bojonegoro, Ngawi, Nganjuk*")
-st.markdown("---")
-
-# ============================================
-# 7. METRIK UTAMA (BERUBAH SESUAI PARAMETER)
-# ============================================
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.metric(
-        label="Total Luas Kawasan",
-        value=f"{forest_data['luas_ha'].sum():,.2f} Ha",
-        delta=f"{((forest_data['luas_ha'].sum() / forest_data_base['luas_ha'].sum()) - 1) * 100:.1f}% dari baseline"
+def apply_chart_settings(fig, show_grid=True, height=400):
+    """Mengaplikasikan pengaturan ke grafik"""
+    fig.update_layout(
+        height=height,
+        hovermode='x unified',
+        template='plotly_white',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        margin=dict(l=40, r=40, t=40, b=40)
     )
-
-with col2:
-    st.metric(
-        label="Komoditas Utama",
-        value="Jati (Tectona grandis)",
-        delta=f"Daur {daur_tebang} Tahun"
+    
+    fig.update_xaxes(showgrid=show_grid)
+    fig.update_yaxes(showgrid=show_grid)
+    
+    fig.update_layout(
+        dragmode='zoom',
+        hoverdistance=100,
+        spikedistance=1000
     )
-
-with col3:
-    total_2017 = production_data_adj['volume_2017'].sum()
-    total_2016 = production_data_adj['volume_2016'].sum()
-    perubahan = ((total_2017 / total_2016) - 1) * 100
-    st.metric(
-        label="Total Produksi Kayu 2017",
-        value=f"{total_2017:,.2f} m³",
-        delta=f"{perubahan:.1f}% (Diskonto {discount_rate:.0f}%)"
-    )
-
-with col4:
-    st.metric(
-        label="NPV Skenario B",
-        value=f"Rp {npv_b/1e6:,.0f} Juta",
-        delta=f"Rp {(npv_b - npv_a)/1e6:,.0f} Juta lebih tinggi"
-    )
+    
+    return fig
 
 # ============================================
-# 8. SEBARAN KELAS UMUR (BERUBAH LUASNYA)
+# FUNGSI create_flexible_chart - FULLY FIXED
 # ============================================
-st.markdown("---")
-st.subheader("📊 Sebaran Luas Berdasarkan Kelas Umur")
-st.caption(f"*Total luas: {forest_data['luas_ha'].sum():,.0f} Ha (dari parameter kontrol)*")
+def create_flexible_chart(data, x_col, y_col, chart_type, color_theme, 
+                          show_labels=True, title="", color_col=None, 
+                          text_col=None, group_col=None, barmode='group'):
+    """
+    Membuat grafik fleksibel dengan berbagai tipe - FULLY FIXED
+    """
+    colors = get_color_theme(color_theme)
+    
+    # Jika data kosong
+    if data.empty:
+        fig = go.Figure()
+        fig.add_annotation(text="Data tidak tersedia", showarrow=False)
+        return fig
+    
+    if chart_type == "Pie":
+        fig = px.pie(
+            data,
+            values=y_col,
+            names=x_col if not color_col else color_col,
+            title=title,
+            color_discrete_sequence=colors,
+            hole=0.3
+        )
+        fig.update_traces(textinfo='percent+label')
+        
+    elif chart_type == "Bar":
+        # ✅ BAR CHART DENGAN LEBAR YANG BESAR
+        if color_col and color_col in data.columns:
+            fig = px.bar(
+                data,
+                x=x_col,
+                y=y_col,
+                color=color_col,
+                title=title,
+                color_discrete_sequence=colors,
+                text=text_col if show_labels and text_col else None,
+                barmode=barmode
+            )
+        else:
+            fig = px.bar(
+                data,
+                x=x_col,
+                y=y_col,
+                title=title,
+                color_discrete_sequence=colors,
+                text=text_col if show_labels and text_col else None
+            )
+        
+        # ✅ Perbaiki lebar bar menjadi lebih besar
+        fig.update_traces(
+            width=0.7,  # Lebar bar 70% dari ruang yang tersedia
+            marker=dict(line=dict(width=1, color='white'))
+        )
+        
+        if show_labels and text_col:
+            fig.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
+        
+        # ✅ Atur ukuran grafik
+        fig.update_layout(
+            bargap=0.15,
+            bargroupgap=0.1
+        )
+        
+    elif chart_type == "Line":
+        # ✅ LINE CHART DENGAN GARIS TEBAL
+        fig = go.Figure()
+        
+        if color_col and color_col in data.columns:
+            for i, group in enumerate(data[color_col].unique()):
+                group_data = data[data[color_col] == group]
+                color_idx = i % len(colors)
+                
+                fig.add_trace(go.Scatter(
+                    x=group_data[x_col],
+                    y=group_data[y_col],
+                    mode='lines+markers',
+                    name=str(group),
+                    line=dict(width=4, color=colors[color_idx]),
+                    marker=dict(size=12, color=colors[color_idx], symbol='circle'),
+                    text=group_data[text_col] if text_col and show_labels else None,
+                    textposition='top center' if show_labels else 'none'
+                ))
+        else:
+            fig.add_trace(go.Scatter(
+                x=data[x_col],
+                y=data[y_col],
+                mode='lines+markers',
+                name=title if title else 'Data',
+                line=dict(width=4, color='#2e7d32'),
+                marker=dict(size=12, color='#2e7d32', symbol='circle'),
+                text=data[text_col] if text_col and show_labels else None,
+                textposition='top center' if show_labels else 'none'
+            ))
+        
+        fig.update_layout(
+            title=title,
+            xaxis_title=x_col,
+            yaxis_title=y_col,
+            showlegend=True
+        )
+        
+    elif chart_type == "Scatter":
+        # ✅ SCATTER DENGAN TITIK BESAR + GARIS PENGHUBUNG
+        fig = go.Figure()
+        
+        if color_col and color_col in data.columns:
+            for i, group in enumerate(data[color_col].unique()):
+                group_data = data[data[color_col] == group]
+                color_idx = i % len(colors)
+                
+                # Garis penghubung
+                fig.add_trace(go.Scatter(
+                    x=group_data[x_col],
+                    y=group_data[y_col],
+                    mode='lines',
+                    name=f"Line - {group}",
+                    line=dict(width=2, color=colors[color_idx], dash='solid'),
+                    showlegend=False
+                ))
+                
+                # Titik
+                fig.add_trace(go.Scatter(
+                    x=group_data[x_col],
+                    y=group_data[y_col],
+                    mode='markers',
+                    name=str(group),
+                    marker=dict(
+                        size=15,
+                        color=colors[color_idx],
+                        symbol='circle',
+                        line=dict(width=2, color='white')
+                    ),
+                    text=group_data[text_col] if text_col and show_labels else None,
+                    textposition='top center' if show_labels else 'none'
+                ))
+        else:
+            # Garis
+            fig.add_trace(go.Scatter(
+                x=data[x_col],
+                y=data[y_col],
+                mode='lines',
+                name='Tren',
+                line=dict(width=2, color='#2e7d32', dash='solid'),
+                showlegend=False
+            ))
+            
+            # Titik
+            fig.add_trace(go.Scatter(
+                x=data[x_col],
+                y=data[y_col],
+                mode='markers',
+                name='Data',
+                marker=dict(
+                    size=15,
+                    color='#2e7d32',
+                    symbol='circle',
+                    line=dict(width=2, color='white')
+                ),
+                text=data[text_col] if text_col and show_labels else None,
+                textposition='top center' if show_labels else 'none'
+            ))
+        
+        fig.update_layout(
+            title=title,
+            xaxis_title=x_col,
+            yaxis_title=y_col,
+            showlegend=True
+        )
+        
+    elif chart_type == "Area":
+        # ✅ AREA CHART
+        if color_col and color_col in data.columns:
+            fig = px.area(
+                data,
+                x=x_col,
+                y=y_col,
+                color=color_col,
+                title=title,
+                color_discrete_sequence=colors,
+                line_shape='linear'
+            )
+        else:
+            fig = px.area(
+                data,
+                x=x_col,
+                y=y_col,
+                title=title,
+                color_discrete_sequence=colors,
+                line_shape='linear'
+            )
+        
+        fig.update_traces(
+            line=dict(width=3),
+            opacity=0.7,
+            marker=dict(size=8)
+        )
+        
+    else:
+        # Default ke Bar
+        fig = px.bar(
+            data,
+            x=x_col,
+            y=y_col,
+            title=title,
+            color_discrete_sequence=colors
+        )
+    
+    return fig
 
-tab1, tab2 = st.tabs(["📈 Chart Interaktif", "📋 Data Tabel"])
+# ============================================
+# 7. KONTEN HALAMAN
+# ============================================
 
-with tab1:
+# ==================== BERANDA ====================
+if menu == "🏠 Beranda":
+    st.title("🏠 Selamat Datang di Eco-Forest Valuation")
+    st.markdown("---")
+    
     col1, col2 = st.columns(2)
     
     with col1:
-        fig_pie = px.pie(
-            forest_data,
-            values='luas_ha',
-            names='kelas_umur',
-            title='Distribusi Luas per Kelas Umur',
-            color_discrete_sequence=px.colors.sequential.Greens_r,
-            hover_data={'persentase': ':.2f%'}
-        )
-        fig_pie.update_traces(textinfo='percent+label')
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.markdown("""
+        ### 📊 Sistem Valuasi Ekonomi Hutan
+        
+        Dashboard ini menyajikan data KPH Saradan dengan visualisasi interaktif.
+        
+        **Fitur Interaktif:**
+        - 🔍 Zoom & Pan pada grafik
+        - 📊 Pilih tipe grafik (Bar/Pie/Line/Scatter/Area)
+        - 🎨 Ubah tema warna (12 tema)
+        - 📥 Hover untuk melihat detail data
+        - 🏷️ Tampilkan/sembunyikan label
+        - 📏 Tampilkan/sembunyikan grid
+        """)
     
     with col2:
-        fig_bar = px.bar(
+        st.subheader("📈 Preview Grafik Interaktif")
+        
+        chart_type, color_theme, show_labels, show_grid = create_chart_controls("Pie")
+        
+        fig = create_flexible_chart(
             forest_data,
-            x='kelas_umur',
-            y='luas_ha',
-            title='Luas Area per Kelas Umur (Ha)',
-            color='persentase',
-            color_continuous_scale='Greens',
-            text='luas_ha'
+            x_col='kelas_umur',
+            y_col='luas_ha',
+            chart_type=chart_type,
+            color_theme=color_theme,
+            show_labels=show_labels,
+            title='Distribusi Luas (Preview)',
+            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            text_col='luas_ha'
         )
-        fig_bar.update_traces(texttemplate='%{text:,.2f}', textposition='outside')
-        fig_bar.update_layout(yaxis_title="Luas (Ha)")
-        st.plotly_chart(fig_bar, use_container_width=True)
+        
+        fig = apply_chart_settings(fig, show_grid)
+        st.plotly_chart(fig, use_container_width=True, key="preview_chart")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("🌳 Total Luas", "37.934,66 Ha")
+    with col2:
+        st.metric("🪵 Komoditas", "Jati")
+    with col3:
+        st.metric("📅 Tahun Data", "2026")
+    with col4:
+        st.metric("📍 Wilayah", "4 Kabupaten")
 
-with tab2:
+# ==================== PROFIL HUTAN ====================
+elif menu == "🌳 Profil Hutan":
+    st.title("🌳 Profil Hutan KPH Saradan")
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("📋 Informasi Umum")
+        st.markdown("""
+        | **Parameter** | **Nilai** |
+        |--------------|-----------|
+        | **Nama KPH** | KPH Saradan |
+        | **Lokasi** | Madiun, Bojonegoro, Ngawi, Nganjuk |
+        | **Luas Total** | 37.934,66 Ha |
+        | **Tipe Hutan** | Hutan Produksi & Lindung |
+        | **Kelas Perusahaan** | Jati (Tectona grandis) |
+        | **Topografi** | Datar hingga Bergelombang |
+        | **Tipe Iklim** | Tipe D (Schmidt-Ferguson) |
+        """)
+    
+    with col2:
+        st.subheader("📊 Statistik Luas")
+        total_luas = forest_data['luas_ha'].sum()
+        luas_terbesar = forest_data['luas_ha'].max()
+        kelas_terbesar = forest_data[forest_data['luas_ha'] == luas_terbesar]['kelas_umur'].values[0]
+        st.metric("Total Luas", f"{total_luas:,.2f} Ha")
+        st.metric("Luas Terbesar", f"{luas_terbesar:,.2f} Ha", f"Kelas {kelas_terbesar}")
+    
+    st.markdown("---")
+    st.subheader("📊 Sebaran Luas Berdasarkan Kelas Umur")
+    
+    st.markdown('<div class="chart-control">', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        min_luas = float(forest_data['luas_ha'].min())
+        max_luas = float(forest_data['luas_ha'].max())
+        luas_range = st.slider(
+            "📏 Filter Rentang Luas (Ha)",
+            min_value=0.0,
+            max_value=max_luas * 1.2,
+            value=(min_luas * 0.8, max_luas * 1.1),
+            step=100.0,
+            key="luas_range"
+        )
+    
+    with col2:
+        chart_type, color_theme, show_labels, show_grid = create_chart_controls("Bar")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    filtered_data = forest_data[
+        (forest_data['luas_ha'] >= luas_range[0]) & 
+        (forest_data['luas_ha'] <= luas_range[1])
+    ]
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        fig = create_flexible_chart(
+            filtered_data,
+            x_col='kelas_umur',
+            y_col='luas_ha',
+            chart_type=chart_type,
+            color_theme=color_theme,
+            show_labels=show_labels,
+            title='Luas per Kelas Umur',
+            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            text_col='luas_ha'
+        )
+        fig = apply_chart_settings(fig, show_grid)
+        st.plotly_chart(fig, use_container_width=True, key="profil_chart1")
+    
+    with col2:
+        fig2 = create_flexible_chart(
+            filtered_data,
+            x_col='kelas_umur',
+            y_col='persentase',
+            chart_type=chart_type,
+            color_theme=color_theme,
+            show_labels=show_labels,
+            title='Persentase per Kelas Umur',
+            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            text_col='persentase'
+        )
+        fig2 = apply_chart_settings(fig2, show_grid)
+        st.plotly_chart(fig2, use_container_width=True, key="profil_chart2")
+    
+    st.markdown("---")
+    st.subheader("📋 Data Detail")
     st.dataframe(
-        forest_data.style.format({
+        filtered_data.style.format({
             'luas_ha': '{:,.2f}',
             'persentase': '{:.2f}%'
         }),
@@ -440,140 +619,390 @@ with tab2:
         hide_index=True
     )
 
-# ============================================
-# 9. PRODUKSI KAYU (BERUBAH VOLUMENYA)
-# ============================================
-st.markdown("---")
-st.subheader("🪵 Produksi Kayu (2016 vs 2017)")
-st.caption(f"*Daur tebang: {daur_tebang} tahun | Harga kayu: Rp {harga_kayu:,.0f}/m³*")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    prod_melted = production_data_adj.melt(
-        id_vars=['jenis_kayu'],
-        value_vars=['volume_2016', 'volume_2017'],
-        var_name='tahun',
-        value_name='volume'
-    )
+# ==================== PRODUKSI KAYU ====================
+elif menu == "🪵 Produksi Kayu":
+    st.title("🪵 Produksi Kayu KPH Saradan")
+    st.markdown("---")
     
-    fig_prod = px.bar(
-        prod_melted,
-        x='jenis_kayu',
-        y='volume',
-        color='tahun',
-        barmode='group',
-        title='Perbandingan Volume Produksi 2016 vs 2017',
-        text='volume',
-        color_discrete_map={'volume_2016': '#2e7d32', 'volume_2017': '#66bb6a'}
-    )
-    fig_prod.update_traces(texttemplate='%{text:,.2f}', textposition='outside')
-    st.plotly_chart(fig_prod, use_container_width=True)
-
-with col2:
-    for _, row in production_data_adj.iterrows():
-        perubahan = ((row['volume_2017'] / row['volume_2016']) - 1) * 100
-        warna = 'red' if perubahan < 0 else 'green'
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        total_2016 = production_data['volume_2016'].sum()
+        st.metric("Total Produksi 2016", f"{total_2016:,.2f} m³")
+    with col2:
+        total_2017 = production_data['volume_2017'].sum()
+        st.metric("Total Produksi 2017", f"{total_2017:,.2f} m³")
+    with col3:
+        perubahan = ((total_2017 / total_2016) - 1) * 100
+        st.metric("Perubahan", f"{perubahan:.2f}%", delta=f"{perubahan:.2f}%")
+    
+    st.markdown("---")
+    
+    st.markdown('<div class="chart-control">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        chart_type, color_theme, show_labels, show_grid = create_chart_controls("Bar")
+    
+    with col2:
+        tahun_filter = st.multiselect(
+            "📅 Filter Tahun",
+            options=['volume_2016', 'volume_2017'],
+            default=['volume_2016', 'volume_2017'],
+            format_func=lambda x: x.replace('volume_', '')
+        )
+    
+    with col3:
+        jenis_filter = st.multiselect(
+            "🪵 Filter Jenis Kayu",
+            options=production_data['jenis_kayu'].tolist(),
+            default=production_data['jenis_kayu'].tolist()
+        )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    filtered_prod = production_data[production_data['jenis_kayu'].isin(jenis_filter)]
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if chart_type == "Pie":
+            data_pie = filtered_prod.melt(
+                id_vars=['jenis_kayu'],
+                value_vars=tahun_filter,
+                var_name='tahun',
+                value_name='volume'
+            )
+            fig = px.pie(
+                data_pie,
+                values='volume',
+                names='jenis_kayu',
+                title='Distribusi Produksi per Jenis Kayu',
+                color='jenis_kayu',
+                color_discrete_map={'Jati': '#2e7d32', 'Rimba': '#66bb6a'},
+                hole=0.3
+            )
+            fig.update_traces(textinfo='percent+label')
+        else:
+            prod_melted = filtered_prod.melt(
+                id_vars=['jenis_kayu'],
+                value_vars=tahun_filter,
+                var_name='tahun',
+                value_name='volume'
+            )
+            fig = create_flexible_chart(
+                prod_melted,
+                x_col='jenis_kayu',
+                y_col='volume',
+                chart_type=chart_type,
+                color_theme=color_theme,
+                show_labels=show_labels,
+                title='Perbandingan Produksi',
+                color_col='tahun' if chart_type != 'Pie' else None,
+                text_col='volume'
+            )
+        
+        fig = apply_chart_settings(fig, show_grid)
+        st.plotly_chart(fig, use_container_width=True, key="produksi_chart1")
+    
+    with col2:
+        prod_melted_line = filtered_prod.melt(
+            id_vars=['jenis_kayu'],
+            value_vars=tahun_filter,
+            var_name='tahun',
+            value_name='volume'
+        )
+        prod_melted_line['tahun'] = prod_melted_line['tahun'].str.replace('volume_', '')
+        
+        fig2 = create_flexible_chart(
+            prod_melted_line,
+            x_col='tahun',
+            y_col='volume',
+            chart_type="Line",
+            color_theme=color_theme,
+            show_labels=show_labels,
+            title='Tren Produksi',
+            color_col='jenis_kayu',
+            text_col='volume'
+        )
+        fig2 = apply_chart_settings(fig2, show_grid)
+        st.plotly_chart(fig2, use_container_width=True, key="produksi_chart2")
+    
+    st.markdown("---")
+    st.subheader("📋 Detail per Jenis Kayu")
+    
+    for _, row in filtered_prod.iterrows():
+        warna = '🔴' if row['perubahan_persen'] < 0 else '🟢'
         st.markdown(f"""
-        <div class="metric-card">
-            <h4>{row['jenis_kayu']}</h4>
-            <p>2016: {row['volume_2016']:,.2f} m³ | 2017: {row['volume_2017']:,.2f} m³</p>
-            <p style="color: {warna}; font-weight: bold;">
-                Perubahan: {perubahan:.2f}%
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-# ============================================
-# 10. ANALISIS KARBON & KELAYAKAN (BERUBAH SEMUA)
-# ============================================
-st.markdown("---")
-st.subheader("🌿 Analisis Karbon & Kelayakan Finansial")
-st.caption(f"*Discount Rate: {discount_rate:.1f}% | Harga Kayu: Rp {harga_kayu:,.0f}/m³*")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    with st.expander("**📊 Parameter Stok Karbon**", expanded=True):
-        st.markdown(f"""
-        - **Luas Kawasan**: {total_luas:,.0f} Ha
-        - **Stok Karbon Minimum**: 348.08 Ton C/Ha
-        - **Stok Karbon Maksimum**: 520.46 Ton C/Ha
-        - **Serapan Tahunan**: 18.50 tCO2e/Ha/Tahun
-        - **Total Serapan**: {total_luas * 18.5:,.0f} tCO2e/tahun
-        - **Harga Karbon**: Rp 150,000 / tCO2e (NEK)
+        ### {row['jenis_kayu']}
+        - **Volume 2016**: {row['volume_2016']:,.2f} m³
+        - **Volume 2017**: {row['volume_2017']:,.2f} m³
+        - **Perubahan**: {warna} {row['perubahan_persen']:.2f}%
         """)
-    
-    st.markdown("### 🔢 Simulasi Cepat")
-    simulasi_luas = st.number_input("Luas untuk Simulasi (Ha)", value=int(total_luas/10), step=100, key="sim_luas")
-    serapan = 18.5
-    total_serapan = simulasi_luas * serapan
-    estimasi_pendapatan = total_serapan * 150000
-    
-    st.metric(
-        label="Estimasi Serapan Karbon per Tahun",
-        value=f"{total_serapan:,.0f} tCO2e",
-        delta=f"≈ Rp {estimasi_pendapatan:,.0f} / tahun"
-    )
 
-with col2:
-    st.markdown("### 💰 Kelayakan Finansial")
+# ==================== MASTER DATA ====================
+elif menu == "📋 Master Data":
+    st.title("📋 Master Data KPH Saradan")
+    st.markdown("---")
     
-    fig = go.Figure()
+    st.subheader("🏢 Informasi Umum KPH")
+    st.markdown("""
+    | **Parameter** | **Nilai / Deskripsi** |
+    |--------------|----------------------|
+    | **Nama KPH** | KPH Saradan |
+    | **Lokasi** | Madiun, Bojonegoro, Ngawi, Nganjuk |
+    | **Luas Total** | 37.934,66 Ha |
+    | **Tipe Hutan** | Hutan Produksi & Lindung |
+    | **Kelas Perusahaan** | Jati (Tectona grandis) |
+    | **Topografi** | Datar hingga Bergelombang (15% – 25%) |
+    | **Tipe Iklim** | Tipe D (Schmidt-Ferguson) |
+    """)
     
-    fig.add_trace(go.Bar(
-        x=['Skenario A\n(Tradisional)', 'Skenario B\n(Hijau Terintegrasi)'],
-        y=[
-            financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_a'].values[0],
-            financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_b'].values[0]
-        ],
-        name='NPV (Rp Juta)',
-        marker_color=['#ff9800', '#2e7d32'],
-        text=[
-            f"Rp {financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_a'].values[0]:,.0f} Juta",
-            f"Rp {financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_b'].values[0]:,.0f} Juta"
-        ],
-        textposition='outside'
-    ))
+    tab1, tab2, tab3 = st.tabs(["🌲 Kelas Umur", "🪵 Produksi Kayu", "💰 Finansial"])
     
-    fig.update_layout(
-        title=f'Perbandingan NPV (Discount Rate: {discount_rate:.1f}%)',
-        yaxis_title='NPV (Rp Juta)',
-        showlegend=False,
-        height=350
+    with tab1:
+        st.dataframe(
+            forest_data.style.format({
+                'luas_ha': '{:,.2f}',
+                'persentase': '{:.2f}%'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+    
+    with tab2:
+        st.dataframe(production_data, use_container_width=True, hide_index=True)
+    
+    with tab3:
+        st.dataframe(
+            financial_data.style.format({
+                'skenario_a': '{:,.0f}',
+                'skenario_b': '{:,.0f}',
+                'selisih': '{:,.0f}'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+
+# ==================== PARAMETER SIMULASI ====================
+elif menu == "⚙️ Parameter Simulasi":
+    st.title("⚙️ Parameter Simulasi")
+    st.markdown("---")
+    
+    st.markdown("### 🎛️ Kontrol Parameter Simulasi")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 Parameter Utama")
+        luas_area = st.slider(
+            "Luas Kawasan Simulasi (Ha)",
+            min_value=1000.0,
+            max_value=50000.0,
+            value=float(forest_data['luas_ha'].sum()),
+            step=100.0
+        )
+        daur_tebang = st.slider(
+            "Daur Tebang Jati (Tahun)",
+            min_value=40,
+            max_value=80,
+            value=60,
+            step=5
+        )
+        discount_rate = st.slider(
+            "Suku Bunga/Discount Rate (%)",
+            min_value=5.0,
+            max_value=25.0,
+            value=15.0,
+            step=0.5
+        )
+    
+    with col2:
+        st.subheader("💰 Parameter Ekonomi")
+        harga_kayu = st.number_input(
+            "Harga Jual Log Kayu Jati (Rp/m³)",
+            min_value=1000000,
+            max_value=10000000,
+            value=3500000,
+            step=100000,
+            format="%d"
+        )
+        biaya_produksi = st.number_input(
+            "Biaya Produksi (Rp/m³)",
+            min_value=500000,
+            max_value=5000000,
+            value=1500000,
+            step=50000,
+            format="%d"
+        )
+        harga_karbon = st.selectbox(
+            "Harga Karbon (Rp/tCO2e)",
+            options=[50000, 100000, 150000, 200000, 250000],
+            index=2
+        )
+    
+    st.markdown("---")
+    st.subheader("📊 Hasil Simulasi")
+    
+    total_luas = luas_area
+    volume_per_ha = 120 * (1 + (daur_tebang - 60) / 200)
+    total_volume = total_luas * volume_per_ha
+    total_pendapatan = total_volume * harga_kayu
+    total_biaya = total_volume * biaya_produksi
+    laba_kotor = total_pendapatan - total_biaya
+    npv = laba_kotor / (1 + discount_rate/100)
+    serapan = total_luas * 18.5
+    nilai_karbon = serapan * harga_karbon
+    total_pendapatan_b = total_pendapatan + nilai_karbon
+    laba_kotor_b = total_pendapatan_b - total_biaya
+    npv_b = laba_kotor_b / (1 + discount_rate/100)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Luas", f"{total_luas:,.0f} Ha")
+    with col2:
+        st.metric("Total Volume", f"{total_volume:,.0f} m³")
+    with col3:
+        st.metric("NPV (Tanpa Karbon)", f"Rp {npv/1e6:,.0f} Juta")
+    with col4:
+        st.metric("NPV (Dengan Karbon)", f"Rp {npv_b/1e6:,.0f} Juta", 
+                  delta=f"+Rp {(npv_b-npv)/1e6:,.0f} Juta")
+    
+    st.markdown("---")
+    st.subheader("📈 Visualisasi Hasil Simulasi")
+    
+    chart_type, color_theme, show_labels, show_grid = create_chart_controls("Bar")
+    
+    sim_data = pd.DataFrame({
+        'Skenario': ['Tradisional', 'Hijau Terintegrasi'],
+        'NPV (Rp Juta)': [npv/1e6, npv_b/1e6],
+        'IRR (%)': [18.0, 20.0],
+        'BCR': [1.45, 1.82]
+    })
+    
+    fig = create_flexible_chart(
+        sim_data,
+        x_col='Skenario',
+        y_col='NPV (Rp Juta)',
+        chart_type=chart_type,
+        color_theme=color_theme,
+        show_labels=show_labels,
+        title='Perbandingan NPV',
+        color_col='Skenario' if chart_type != 'Pie' else None,
+        text_col='NPV (Rp Juta)'
     )
-    st.plotly_chart(fig, use_container_width=True)
     
-    st.dataframe(
-        financial_data.style.format({
-            'skenario_a': '{:,.0f}',
-            'skenario_b': '{:,.0f}',
-            'selisih': '{:,.0f}'
-        }),
-        use_container_width=True,
-        hide_index=True
-    )
+    if chart_type == "Pie":
+        fig.update_traces(marker=dict(colors=['#ff9800', '#2e7d32']))
+    
+    fig = apply_chart_settings(fig, show_grid)
+    st.plotly_chart(fig, use_container_width=True, key="simulasi_chart")
+
+# ==================== DASHBOARD SUMMARY ====================
+elif menu == "📈 Dashboard Summary":
+    st.title("📈 Dashboard Summary KPH Saradan")
+    st.markdown("---")
+    
+    st.subheader("📊 Ringkasan Metrik Utama")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("🌳 Total Luas", f"{forest_data['luas_ha'].sum():,.2f} Ha")
+    with col2:
+        st.metric("🪵 Produksi 2017", f"{production_data['volume_2017'].sum():,.2f} m³")
+    with col3:
+        npv_a = financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_a'].values[0]
+        st.metric("💵 NPV Tradisional", f"Rp {npv_a:,.0f} Juta")
+    with col4:
+        npv_b = financial_data[financial_data['indikator'] == 'NPV (Rp Juta)']['skenario_b'].values[0]
+        st.metric("🌿 NPV Hijau", f"Rp {npv_b:,.0f} Juta", delta=f"+Rp {npv_b-npv_a:,.0f} Juta")
+    
+    st.markdown("---")
+    
+    st.markdown('<div class="chart-control">', unsafe_allow_html=True)
+    chart_type, color_theme, show_labels, show_grid = create_chart_controls("Bar")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        fig = create_flexible_chart(
+            forest_data,
+            x_col='kelas_umur',
+            y_col='luas_ha',
+            chart_type=chart_type,
+            color_theme=color_theme,
+            show_labels=show_labels,
+            title='Distribusi Luas per Kelas Umur',
+            color_col='kelas_umur' if chart_type != 'Pie' else None,
+            text_col='luas_ha'
+        )
+        fig = apply_chart_settings(fig, show_grid, height=350)
+        st.plotly_chart(fig, use_container_width=True, key="summary_chart1")
+    
+    with col2:
+        prod_melted = production_data.melt(
+            id_vars=['jenis_kayu'],
+            value_vars=['volume_2016', 'volume_2017'],
+            var_name='tahun',
+            value_name='volume'
+        )
+        
+        if chart_type == "Pie":
+            data_pie = prod_melted.copy()
+            data_pie['label'] = data_pie['jenis_kayu'] + ' ' + data_pie['tahun'].str.replace('volume_', '')
+            fig2 = px.pie(
+                data_pie,
+                values='volume',
+                names='label',
+                title='Distribusi Produksi',
+                color='jenis_kayu',
+                color_discrete_map={'Jati': '#2e7d32', 'Rimba': '#66bb6a'},
+                hole=0.3
+            )
+            fig2.update_traces(textinfo='percent+label')
+        else:
+            fig2 = create_flexible_chart(
+                prod_melted,
+                x_col='jenis_kayu',
+                y_col='volume',
+                chart_type=chart_type,
+                color_theme=color_theme,
+                show_labels=show_labels,
+                title='Produksi 2016 vs 2017',
+                color_col='tahun' if chart_type != 'Pie' else None,
+                text_col='volume'
+            )
+        
+        fig2 = apply_chart_settings(fig2, show_grid, height=350)
+        st.plotly_chart(fig2, use_container_width=True, key="summary_chart2")
+    
+    st.markdown("---")
+    st.subheader("💡 Kesimpulan")
+    
+    kesimpulan_data = pd.DataFrame({
+        'Indikator': ['NPV', 'IRR', 'BCR'],
+        'Skenario A (Tradisional)': ['Rp 4.078 Juta', '18.00%', '1.45'],
+        'Skenario B (Hijau)': ['Rp 7.058 Juta', '20.00%', '1.82'],
+        'Status': ['✅ Meningkat 73%', '✅ Melewati batas modal', '✅ Efisiensi biaya naik']
+    })
+    
+    st.dataframe(kesimpulan_data, use_container_width=True, hide_index=True)
+    
+    st.markdown("""
+    **Kesimpulan:** Skenario B (Hijau Terintegrasi) lebih layak secara finansial dengan 
+    insentif karbon yang memberikan tambahan keuntungan signifikan.
+    """)
+    
+    st.success("✅ Dashboard KPH Saradan siap digunakan untuk analisis dan simulasi!")
 
 # ============================================
-# 11. FOOTER
+# FOOTER
 # ============================================
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center; color: #666; font-size: 0.9rem;">
+<div style="text-align: center; color: #666; font-size: 0.8rem;">
     <p>🌱 Dashboard KPH Saradan | Data Tahun 2026</p>
     <p>Dibangun untuk Mata Kuliah Ekonomi Sumber Daya Alam dan Lingkungan</p>
-    <p style="font-size: 0.8rem; color: #999;">
-        Dosen Pengampu: Yuhka Sundaya, S.E., M.Si.
-    </p>
-    <hr style="border: none; border-top: 1px solid #ddd; margin: 0.5rem auto; width: 50%;">
-    <p style="font-size: 0.8rem; color: #aaa;">
-        © 2026 - Kelompok KPH Saradan
-    </p>
+    <p style="font-size: 0.7rem; color: #999;">© 2026 - Kelompok KPH Saradan</p>
 </div>
 """, unsafe_allow_html=True)
-
-# ============================================
-# 12. RUN
-# ============================================
-if __name__ == "__main__":
-    pass
