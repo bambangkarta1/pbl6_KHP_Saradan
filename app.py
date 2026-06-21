@@ -80,22 +80,6 @@ st.markdown("""
         margin: 0.2rem 0 0 0;
         opacity: 0.9;
     }
-    .group-member {
-        font-size: 0.9rem;
-        padding: 0.3rem 0;
-        border-bottom: 1px solid #e8f0e8;
-    }
-    .group-member:last-child {
-        border-bottom: none;
-    }
-    .course-info {
-        background-color: #e8f5e9;
-        padding: 0.8rem;
-        border-radius: 0.5rem;
-        margin-top: 0.5rem;
-        font-size: 0.85rem;
-        line-height: 1.6;
-    }
     .divider-custom {
         border: none;
         border-top: 2px solid #c8e6c9;
@@ -110,6 +94,48 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e0ece0;
         margin-bottom: 1rem;
+    }
+    .group-card {
+        background-color: #f0f7f0;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #2e7d32;
+        height: 100%;
+        text-align: center;
+    }
+    .group-card p {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1a5e3a;
+        margin-bottom: 0.2rem;
+    }
+    .group-card small {
+        font-size: 0.85rem;
+        color: #555;
+    }
+    .course-card {
+        background-color: #e8f5e9;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.5rem;
+        border: 1px solid #a5d6a7;
+        text-align: center;
+    }
+    .course-card p {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1a5e3a;
+        margin-bottom: 0.2rem;
+    }
+    .course-card span {
+        font-size: 1rem;
+        color: #333;
+    }
+    .identity-container {
+        background: #f8faf8;
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid #e8f0e8;
+        margin-bottom: 1.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -126,7 +152,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# 5. SIDEBAR
+# 5. SIDEBAR (HANYA NAVIGASI)
 # ============================================
 with st.sidebar:
     try:
@@ -155,25 +181,6 @@ with st.sidebar:
     )
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
-    
-    st.markdown("### 👥 Kelompok")
-    st.markdown("""
-    <div class="group-member">👤 Arif Hamdani (10090224008)</div>
-    <div class="group-member">👤 Bambang Karta Wijaya (10090224025)</div>
-    <div class="group-member">👤 Moh Bayu Mustofa (10090224030)</div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="course-info">
-        <strong>📚 Mata Kuliah</strong><br>
-        Ekonomi Sumber Daya Alam dan Lingkungan
-        <br><br>
-        <strong>👨‍🏫 Dosen Pengampu</strong><br>
-        Yuhka Sundaya, S.E., M.Si.
-    </div>
-    """, unsafe_allow_html=True)
 
 # ============================================
 # 6. FUNGSI KONTROL GRAFIK
@@ -305,20 +312,16 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
         )
 
     elif chart_type == "Line":
-        # ===== PERBAIKAN: selalu plot sebagai 1 trace agar garis muncul =====
-        # color_col diabaikan untuk Line chart karena tiap group hanya 1 titik
         fig = go.Figure()
 
-        # Cek apakah ada kolom group yang punya >1 baris per group (misal tahun)
         if color_col and color_col in data.columns and x_col != color_col:
-            # Kasus data multi-series (misal produksi: group=jenis_kayu, x=tahun)
             unique_groups = data[color_col].unique()
             x_labels = sorted(data[x_col].unique().tolist())
 
             for i, group in enumerate(unique_groups):
                 group_data = data[data[color_col] == group].copy()
                 if len(group_data) < 2:
-                    continue  # skip group dengan 1 titik saja
+                    continue
                 color_idx = i % len(colors)
                 x_numeric = list(range(len(group_data)))
                 y_values = group_data[y_col].tolist()
@@ -344,7 +347,6 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                     )
                 )
         else:
-            # Kasus 1 series — plot semua baris sebagai 1 garis
             x_numeric = list(range(len(data)))
             x_labels = data[x_col].tolist()
             y_values = data[y_col].tolist()
@@ -377,11 +379,9 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
         )
 
     elif chart_type == "Scatter":
-        # ===== PERBAIKAN: selalu plot sebagai 1 trace agar garis penghubung muncul =====
         fig = go.Figure()
 
         if color_col and color_col in data.columns and x_col != color_col:
-            # Kasus multi-series (tiap group punya >1 titik)
             unique_groups = data[color_col].unique()
 
             for i, group in enumerate(unique_groups):
@@ -393,7 +393,6 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                 y_values = group_data[y_col].tolist()
                 x_labels_group = group_data[x_col].tolist()
 
-                # Garis penghubung
                 fig.add_trace(go.Scatter(
                     x=x_numeric,
                     y=y_values,
@@ -403,7 +402,6 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                     showlegend=False
                 ))
 
-                # Titik
                 fig.add_trace(go.Scatter(
                     x=x_numeric,
                     y=y_values,
@@ -423,12 +421,10 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                     )
                 )
         else:
-            # Kasus 1 series — semua baris jadi 1 garis
             x_numeric = list(range(len(data)))
             x_labels = data[x_col].tolist()
             y_values = data[y_col].tolist()
 
-            # Garis penghubung
             fig.add_trace(go.Scatter(
                 x=x_numeric,
                 y=y_values,
@@ -438,7 +434,6 @@ def create_flexible_chart(data, x_col, y_col, chart_type, color_theme,
                 showlegend=False
             ))
 
-            # Titik
             fig.add_trace(go.Scatter(
                 x=x_numeric,
                 y=y_values,
@@ -512,6 +507,66 @@ if menu == "🏠 Beranda":
     st.title("🏠 Selamat Datang di Eco-Forest Valuation")
     st.markdown("---")
     
+    # ==========================================
+    # IDENTITAS KELOMPOK - DI ATAS BERANDA
+    # ==========================================
+    st.markdown("""
+    <div class="identity-container">
+        <h4 style="color: #1a5e3a; text-align: center; margin-bottom: 0.8rem;">👥 Identitas Kelompok</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div class="group-card">
+            <p>👤 Arif Hamdani</p>
+            <small>10090224008</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="group-card">
+            <p>👤 Bambang Karta Wijaya</p>
+            <small>10090224025</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="group-card">
+            <p>👤 Moh Bayu Mustofa</p>
+            <small>10090224030</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="course-card">
+            <p>📚 Mata Kuliah</p>
+            <span>Ekonomi Sumber Daya Alam dan Lingkungan</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="course-card">
+            <p>👨‍🏫 Dosen Pengampu</p>
+            <span>Yuhka Sundaya, S.E., M.Si.</span>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # ==========================================
+    # FITUR DAN PREVIEW GRAFIK
+    # ==========================================
     col1, col2 = st.columns(2)
     
     with col1:
@@ -745,7 +800,6 @@ elif menu == "🪵 Produksi Kayu":
     
     with col2:
         if chart_type == "Line":
-            # ===== PERBAIKAN LINE CHART PRODUKSI =====
             fig2 = go.Figure()
 
             for kayu in filtered_prod['jenis_kayu'].unique():
@@ -787,7 +841,6 @@ elif menu == "🪵 Produksi Kayu":
             )
 
         elif chart_type == "Scatter":
-            # ===== PERBAIKAN SCATTER CHART PRODUKSI =====
             fig2 = go.Figure()
 
             for kayu in filtered_prod['jenis_kayu'].unique():
@@ -802,7 +855,6 @@ elif menu == "🪵 Produksi Kayu":
                 x_numeric = list(range(len(years_label)))
                 warna = '#2e7d32' if kayu == 'Jati' else '#66bb6a'
 
-                # GARIS penghubung
                 fig2.add_trace(go.Scatter(
                     x=x_numeric,
                     y=volumes,
@@ -812,7 +864,6 @@ elif menu == "🪵 Produksi Kayu":
                     showlegend=False
                 ))
 
-                # TITIK
                 fig2.add_trace(go.Scatter(
                     x=x_numeric,
                     y=volumes,
