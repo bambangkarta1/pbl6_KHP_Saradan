@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+myenv/
+*.egg-info/
+dist/
+build/
+
+# Streamlit
+.streamlit/cache/
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Data besar (opsional)
+*.csv
+*.xlsx
+*.db
+
+# Logs
+*.log
