@@ -7,20 +7,83 @@ from PIL import Image
 import os
 
 # ============================================
-# 1. KONFIGURASI HALAMAN
+# 1. KONFIGURASI HALAMAN (PAGE TITLE)
 # ============================================
 st.set_page_config(
-    page_title="KPH Saradan - Dashboard Kehutanan",
+    page_title="ECO-FOREST VALUATION - KPH Saradan",  # ← Ini judul tab browser
     page_icon="🌳",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ============================================
-# 2. DATA DASAR (TIDAK BERUBAH)
+# 2. HEADER DENGAN ECO-FOREST VALUATION
 # ============================================
 
-# Data Kelas Umur (data statis, tidak berubah)
+# CSS untuk header
+st.markdown("""
+<style>
+    .eco-header {
+        background: linear-gradient(135deg, #1a3a2a 0%, #2e7d32 50%, #1a5e3a 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+    }
+    .eco-header h1 {
+        color: white !important;
+        font-size: 2.8rem !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+        letter-spacing: 2px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .eco-header h1 span {
+        color: #a5d6a7;
+    }
+    .eco-header .sub {
+        color: #c8e6c9;
+        font-size: 1.1rem;
+        margin: 0.3rem 0 0 0;
+        letter-spacing: 1px;
+    }
+    .eco-header .location {
+        color: #81c784;
+        font-size: 0.9rem;
+        margin: 0.2rem 0 0 0;
+        opacity: 0.8;
+    }
+    .eco-divider {
+        border: none;
+        border-top: 3px solid #2e7d32;
+        margin: 0.5rem 0 1.5rem 0;
+        opacity: 0.3;
+    }
+    .main-header {
+        font-size: 2rem;
+        color: #1a5e3a;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header ECO-FOREST VALUATION
+st.markdown("""
+<div class="eco-header">
+    <h1>🌳 ECO-FOREST <span>VALUATION</span></h1>
+    <p class="sub">Sistem Valuasi Ekonomi Hutan Berkelanjutan</p>
+    <p class="location">📍 KPH Saradan · Jawa Timur</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# 3. DATA (LANGSUNG DI SINI)
+# ============================================
+
+# Data Kelas Umur
 forest_data_base = pd.DataFrame({
     'kelas_umur': ['KU I', 'KU II', 'KU III', 'KU IV', 'KU V', 'KU VI', 'KU VII', 'KU VIII'],
     'kisaran_umur': ['1-10 Tahun', '11-20 Tahun', '21-30 Tahun', '31-40 Tahun', 
