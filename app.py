@@ -17,68 +17,69 @@ st.set_page_config(
 )
 
 # ============================================
-# 2. HEADER DENGAN ECO-FOREST VALUATION
+# HEADER ECO-FOREST VALUATION (VERSION 2)
 # ============================================
 
-# CSS untuk header
+# CSS untuk header - warna lebih elegan
 st.markdown("""
 <style>
     .eco-header {
-        background: linear-gradient(135deg, #1a3a2a 0%, #2e7d32 50%, #1a5e3a 100%);
-        padding: 1.5rem 2rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
+        background: linear-gradient(145deg, #0d2b1e 0%, #1a5e3a 50%, #0d2b1e 100%);
+        padding: 1.8rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+        box-shadow: 0 4px 20px rgba(26, 94, 58, 0.4);
+        border: 1px solid rgba(165, 214, 167, 0.15);
     }
     .eco-header h1 {
-        color: white !important;
-        font-size: 2.8rem !important;
+        color: #ffffff !important;
+        font-size: 2.6rem !important;
         font-weight: 700 !important;
         margin: 0 !important;
-        letter-spacing: 2px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        letter-spacing: 3px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-    .eco-header h1 span {
-        color: #a5d6a7;
+    .eco-header h1 .highlight {
+        color: #81c784;
+        font-weight: 300;
     }
     .eco-header .sub {
-        color: #c8e6c9;
-        font-size: 1.1rem;
-        margin: 0.3rem 0 0 0;
-        letter-spacing: 1px;
+        color: #a5d6a7;
+        font-size: 1.05rem;
+        margin: 0.4rem 0 0 0;
+        letter-spacing: 2px;
+        font-weight: 300;
     }
     .eco-header .location {
-        color: #81c784;
+        color: #66bb6a;
         font-size: 0.9rem;
-        margin: 0.2rem 0 0 0;
-        opacity: 0.8;
+        margin: 0.3rem 0 0 0;
+        opacity: 0.9;
+        letter-spacing: 1px;
+    }
+    .eco-header .location span {
+        color: #c8e6c9;
     }
     .eco-divider {
         border: none;
-        border-top: 3px solid #2e7d32;
-        margin: 0.5rem 0 1.5rem 0;
-        opacity: 0.3;
-    }
-    .main-header {
-        font-size: 2rem;
-        color: #1a5e3a;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 0.5rem;
+        border-top: 2px solid #2e7d32;
+        margin: 0.3rem 0 1.5rem 0;
+        opacity: 0.2;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Header ECO-FOREST VALUATION
+# Header ECO-FOREST VALUATION (tanpa kata "Berkelanjutan")
 st.markdown("""
 <div class="eco-header">
-    <h1>🌳 ECO-FOREST <span>VALUATION</span></h1>
-    <p class="sub">Sistem Valuasi Ekonomi Hutan Berkelanjutan</p>
-    <p class="location">📍 KPH Saradan · Jawa Timur</p>
+    <h1>🌳 ECO-FOREST <span class="highlight">VALUATION</span></h1>
+    <p class="sub">Sistem Valuasi Ekonomi Hutan</p>
+    <p class="location">📍 KPH Saradan <span>·</span> Jawa Timur</p>
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown('<hr class="eco-divider">', unsafe_allow_html=True)
 # ============================================
 # 3. DATA (LANGSUNG DI SINI)
 # ============================================
@@ -100,11 +101,13 @@ production_data = pd.DataFrame({
     'perubahan_persen': [-16.46, -3.90]
 })
 
-# ============================================
-# 3. CUSTOM CSS
-# ============================================
 st.markdown("""
 <style>
+    /* ==========================================
+       CLASS YANG DIPERTAHANKAN (DARI CSS LAMA)
+       ========================================== */
+    
+    /* Header utama dashboard */
     .main-header {
         font-size: 2.5rem;
         color: #1a5e3a;
@@ -112,6 +115,8 @@ st.markdown("""
         text-align: center;
         margin-bottom: 1rem;
     }
+    
+    /* Card untuk metrik */
     .metric-card {
         background-color: #f0f7f0;
         padding: 1rem;
@@ -119,14 +124,23 @@ st.markdown("""
         border-left: 4px solid #2e7d32;
         margin: 0.5rem 0;
     }
+    
+    /* Background aplikasi */
     .stApp {
         background-color: #f8faf8;
     }
+    
+    /* Logo di sidebar */
     .sidebar-logo {
         display: flex;
         justify-content: center;
         margin-bottom: 1rem;
     }
+    
+    /* ==========================================
+       CLASS YANG DIHAPUS (TIDAK DIPAKAI LAGI)
+       ========================================== */
+    /*
     .sidebar-title {
         text-align: center;
         font-size: 1.2rem;
@@ -141,6 +155,13 @@ st.markdown("""
         color: #555;
         margin-bottom: 0.5rem;
     }
+    */
+    
+    /* ==========================================
+       CLASS YANG DIPERTAHANKAN (DARI CSS LAMA)
+       ========================================== */
+    
+    /* Anggota kelompok di sidebar */
     .group-member {
         font-size: 0.9rem;
         padding: 0.3rem 0;
@@ -149,6 +170,8 @@ st.markdown("""
     .group-member:last-child {
         border-bottom: none;
     }
+    
+    /* Info kuliah di sidebar */
     .course-info {
         background-color: #e8f5e9;
         padding: 0.8rem;
@@ -157,16 +180,26 @@ st.markdown("""
         font-size: 0.85rem;
         line-height: 1.6;
     }
+    
+    /* Garis pemisah di sidebar */
     .divider-custom {
         border: none;
         border-top: 2px solid #c8e6c9;
         margin: 0.8rem 0;
     }
+    
+    /* ==========================================
+       TAMBAHAN BARU (HILANGKAN JUDUL DEFAULT)
+       ========================================== */
+    
+    /* Hilangkan judul default Streamlit di sidebar */
+    .css-1d391kg {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
-
 # ============================================
-# 4. SIDEBAR DENGAN PARAMETER KONTROL
+# SIDEBAR (TANPA "KPH Saradan Dashboard Kehutanan")
 # ============================================
 with st.sidebar:
     # --- LOGO UNISBA ---
@@ -182,7 +215,7 @@ with st.sidebar:
                 <p style="color: #a5d6a7; margin: 0;">Universitas Islam Bandung</p>
             </div>
             """, unsafe_allow_html=True)
-    except Exception as e:
+    except Exception:
         st.markdown("""
         <div style="text-align: center; padding: 1rem; background-color: #1a5e3a; color: white; border-radius: 0.5rem;">
             <h3 style="color: white; margin: 0;">UNISBA</h3>
@@ -192,11 +225,8 @@ with st.sidebar:
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
     
-    # --- JUDUL SIDEBAR ---
-    st.markdown('<p class="sidebar-title">🌳 KPH Saradan</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sidebar-subtitle">Dashboard Kehutanan</p>', unsafe_allow_html=True)
-    
-    st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
+    # --- HILANGKAN "KPH Saradan Dashboard Kehutanan" ---
+    # LANGSUNG KE IDENTITAS KELOMPOK
     
     # --- IDENTITAS KELOMPOK ---
     st.markdown("### 👥 Kelompok")
@@ -221,58 +251,46 @@ with st.sidebar:
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
     
-    # ============================================
-    # ⚙️ PARAMETER KONTROL (NILAI AKAN DIGUNAKAN)
-    # ============================================
+    # --- PARAMETER KONTROL ---
     st.markdown("### ⚙️ Parameter Kontrol")
     
-    # 1. SLIDER LUAS KAWASAN - akan mengubah metrik luas
     luas_area = st.slider(
         "Luas Kawasan Simulasi (Ha)",
         min_value=1000.0,
         max_value=50000.0,
         value=float(forest_data_base['luas_ha'].sum()),
-        step=100.0,
-        help="Mengubah total luas kawasan yang disimulasikan"
+        step=100.0
     )
     
-    # 2. SLIDER DAUR TEBANG - akan mengubah proyeksi produksi
     daur_tebang = st.slider(
         "Daur Tebang Jati (Tahun)",
         min_value=40,
         max_value=80,
         value=60,
-        step=5,
-        help="Mengubah umur optimal tebang habis"
+        step=5
     )
     
-    # 3. SLIDER DISCOUNT RATE - akan mengubah NPV, IRR, BCR
     discount_rate = st.slider(
         "Suku Bunga/Discount Rate (%)",
         min_value=5.0,
         max_value=25.0,
         value=15.0,
-        step=0.5,
-        help="Mengubah tingkat diskonto untuk analisis NPV"
+        step=0.5
     )
     
-    # 4. HARGA KAYU - akan mengubah pendapatan
     harga_kayu = st.number_input(
         "Harga Kayu (Rp/m³)",
         min_value=1000000,
         max_value=10000000,
         value=3500000,
         step=100000,
-        format="%d",
-        help="Mengubah harga jual kayu per meter kubik"
+        format="%d"
     )
     
     st.markdown('<hr class="divider-custom">', unsafe_allow_html=True)
     st.caption("📊 Data KPH Saradan 2026")
     
-    # ============================================
-    # TAMPILKAN NILAI PARAMETER YANG SEDANG AKTIF
-    # ============================================
+    # --- TAMPILKAN NILAI PARAMETER ---
     with st.expander("📋 Nilai Parameter Aktif"):
         st.markdown(f"""
         - **Luas Kawasan**: {luas_area:,.0f} Ha
